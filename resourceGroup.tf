@@ -13,6 +13,7 @@ variable DNSServers {
 variable SubnetPrefix {}
 variable StorageAccountType {}
 variable DiskSizeGB {}
+
 #vm options
 variable VMSize {}
 variable VMpublisher {}
@@ -37,7 +38,7 @@ resource "azurerm_virtual_network" "vnet1" {
   name                = "virtualNetwork1"
   resource_group_name = "${azurerm_resource_group.rg1.name}"
   address_space       = ["${var.AddressSpace}"]
-  location            = "West US"
+  location            = "${var.Location}"
   dns_servers         = ["${var.DNSServers}"]
 
   subnet {
@@ -66,23 +67,23 @@ resource "azurerm_network_interface" "nic" {
         private_ip_address_allocation = "dynamic"
     }
 }
+
 resource "azurerm_managed_disk" "disk" {
-    name = "${var.ManagedDiskName}"
-    location = "${var.Location}"
-    resource_group_name = "${var.ResourceGroupName}"
-    storage_account_type = "${var.StorageAccountType}"
-    create_option = "Empty"
-    disk_size_gb = "${var.DiskSizeGB}"
+  name                  = "${var.ManagedDiskName}"
+  resource_group_name   = "${azurerm_resource_group.rg1.name}"
+  storage_account_type  = "${var.StorageAccountType}"
+  location              = "${var.Location}"
+  create_option         = "Empty"
+  disk_size_gb          = "7"
 }
+
 resource "azurerm_virtual_machine" "VM" {
-    delete_os_disk_on_termination = false
     name = "${var.VirtualMachineName}"
     location = "${var.Location}"
     resource_group_name = "${var.ResourceGroupName}"
     network_interface_ids = ["${azurerm_network_interface.nic.id}"]
     vm_size = "${var.VMSize}"
-    
-
+    delete_os_disk_on_termination = true
   storage_image_reference {
     publisher = "${var.VMpublisher}"
     offer     = "${var.VMoffer}"
@@ -93,8 +94,8 @@ resource "azurerm_virtual_machine" "VM" {
   storage_os_disk {
     name              = "myosdisk1"
     caching           = "${var.VMcaching}"
-    create_option     = "attach"
-    managed_disk_type = "${var.VMmanaged_disk_type}"
+    managed_disk_id   = "${azurerm_managed_disk.disk.id}"
+    create_option     = "FromImage"
   }
 
   # Optional data disks
@@ -103,7 +104,7 @@ resource "azurerm_virtual_machine" "VM" {
     managed_disk_type = "${var.VMmanaged_disk_type}"
     create_option     = "Empty"
     lun               = "${var.VMlun}"
-    disk_size_gb      = "${var.VMdisk_size_gb}"
+    disk_size_gb      = "${var.VMSize}"
   }
 
   storage_data_disk {
@@ -113,6 +114,8 @@ resource "azurerm_virtual_machine" "VM" {
     lun             = 1
     disk_size_gb    = "${azurerm_managed_disk.disk.disk_size_gb}"
   }
+
+  # Optional data disks
 
   os_profile {
     computer_name  = "${var.VMcomputer_name}"

@@ -1,5 +1,5 @@
 ResourceGroupName = "AveResGr1"
-Location = "East US"
+Location = "West US 2"
 VirtualNetworkName = "AveVirNet1"
 SubnetName = "sub1"
 NetworkInterfaceName = "AveNetInt1"

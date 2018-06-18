@@ -1,4 +1,4 @@
-VMSize = "Standard_DS1_v2"
+VMSize = "Standard_DS1_V2"
 
 #storage_image_reference
 VMpublisher = "Canonical"
@@ -13,7 +13,8 @@ VMmanaged_disk_type = "Standard_LRS"
  
 #storage_data_disk
 VMlun               = 0
-VMdisk_size_gb      = "1023"
+VMdisk_size_gb      = "7"
+VMSize              = "7"
 
 #os_profile 
 VMcomputer_name  = "hostname"
